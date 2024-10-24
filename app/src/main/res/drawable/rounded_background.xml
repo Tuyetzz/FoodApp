@@ -1,0 +1,19 @@
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Thiết lập màu nền -->
+    <solid android:color="#E0F7FA" /> <!-- Bạn có thể thay thế màu theo ý muốn -->
+
+    <!-- Thiết lập viền cho layout -->
+    <stroke
+        android:width="2dp"
+        android:color="#00796B" /> <!-- Màu và độ rộng của viền -->
+
+    <!-- Bo góc cho background -->
+    <corners android:radius="16dp" /> <!-- Độ bo góc, bạn có thể chỉnh sửa kích thước này -->
+
+    <!-- Thiết lập padding (khoảng cách bên trong viền) -->
+    <padding
+        android:left="8dp"
+        android:top="8dp"
+        android:right="8dp"
+        android:bottom="8dp" />
+</shape>
