@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="4dp">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="12dp">
+
+        <!-- Discount Code TextView -->
+        <TextView
+            android:id="@+id/textViewCode"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Discount Code"
+            android:textColor="#000"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/btnDelete" />
+
+        <!-- Discount Percentage TextView -->
+        <TextView
+            android:id="@+id/textViewPercentage"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Discount Percentage"
+            android:textColor="#008000"
+            android:textSize="16sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/textViewCode"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- Expiry Date TextView -->
+        <TextView
+            android:id="@+id/textViewExpiryDate"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Expiry Date"
+            android:textColor="#888888"
+            android:textSize="14sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/textViewPercentage"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- Delete Button -->
+        <Button
+            android:id="@+id/btnDelete"
+            android:layout_width="250px"
+            android:layout_height="100px"
+            android:text="Delete"
+            android:backgroundTint="#FF0000"
+            android:textColor="#FFFFFF"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- Expired Status Button -->
+        <Button
+            android:id="@+id/btnExpired"
+            android:layout_width="250px"
+            android:layout_height="100px"
+            android:text="Expired"
+            android:backgroundTint="#FFA500"
+            android:textColor="#FFFFFF"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/btnDelete"
+            app:layout_constraintBottom_toBottomOf="@id/textViewExpiryDate" />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.cardview.widget.CardView>

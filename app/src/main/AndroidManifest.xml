@@ -2,7 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -13,24 +14,52 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Material3.Light"
         tools:targetApi="31">
+
+        <!-- Activities in the 'view' package -->
+        <activity
+            android:name=".admin.view.DiscountActivity"
+            android:exported="false" />
+        <activity
+            android:name=".admin.view.ViewStatistic"
+            android:exported="false" />
+        <activity
+            android:name=".admin.view.PendingOrder"
+            android:exported="false" />
+        <activity
+            android:name=".admin.view.CreateAdmin"
+            android:exported="false" />
+        <activity
+            android:name=".admin.view.OutForDelivery"
+            android:exported="false" />
+        <activity
+            android:name=".admin.view.All_item"
+            android:exported="false" />
+        <activity
+            android:name=".admin.view.Admin_profile"
+            android:exported="false" />
+        <activity
+            android:name=".admin.view.AddItem"
+            android:exported="false" />
+
+        <!-- Login and Register activities -->
         <activity
             android:name=".Register"
-            android:theme="@style/Theme.Material3.Light.NoActionBar"
-            android:exported="false" />
+            android:exported="false"
+            android:theme="@style/Theme.Material3.Light.NoActionBar" />
         <activity
             android:name=".Login"
             android:exported="true"
             android:theme="@style/Theme.Material3.Light.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- MainActivity in the 'view' package -->
         <activity
-            android:name=".MainActivity"
-            android:exported="true">
-        </activity>
+            android:name=".admin.view.MainActivity"
+            android:exported="false" />
     </application>
 
 </manifest>

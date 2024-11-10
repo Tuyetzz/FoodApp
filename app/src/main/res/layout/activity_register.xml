@@ -8,7 +8,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="10dp"
-    tools:context=".Register">
+    tools:context=".view.Register">
 
     <TextView
         android:text="Register"
@@ -25,8 +25,8 @@
         android:layout_height="wrap_content">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/email"
-            android:hint="email"
+            android:id="@+id/username"
+            android:hint="username"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
     </com.google.android.material.textfield.TextInputLayout>
