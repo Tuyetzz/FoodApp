@@ -69,7 +69,7 @@ public class Admin_profile extends AppCompatActivity {
 
         gobackBtn = findViewById(R.id.goback);
         gobackBtn.setOnClickListener(view -> {
-            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+            Intent intent = new Intent(getApplicationContext(), MainAdminActivity.class);
             intent.putExtra("user", user);
             startActivity(intent);
             finish();

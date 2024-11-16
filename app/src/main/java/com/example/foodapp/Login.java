@@ -17,9 +17,9 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-import com.example.foodapp.R;
 import com.example.foodapp.admin.model.User;
-import com.example.foodapp.admin.view.MainActivity;
+import com.example.foodapp.admin.view.MainAdminActivity;
+import com.example.foodapp.user.view.MainUserActivity;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -45,14 +45,12 @@ public class Login extends AppCompatActivity {
             return insets;
         });
 
-        // Initialize UI elements
         editTextUsername = findViewById(R.id.username);
         editTextPassword = findViewById(R.id.password);
         loginBtn = findViewById(R.id.loginBtn);
         progressBar = findViewById(R.id.progressBar);
         textView = findViewById(R.id.registerNow);
 
-        // Initialize Firestore
         db = FirebaseFirestore.getInstance();
 
         textView.setOnClickListener(view -> {
@@ -77,6 +75,7 @@ public class Login extends AppCompatActivity {
                 return;
             }
 
+            // checkLogin()
             db.collection("users")
                     .whereEqualTo("username", username)
                     .whereEqualTo("password", password)
@@ -91,12 +90,16 @@ public class Login extends AppCompatActivity {
                                 if (user != null) {
                                     if ("manager".equals(user.getRole())) {
                                         Toast.makeText(Login.this, "Login successful as Manager", Toast.LENGTH_SHORT).show();
-                                        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                                        Intent intent = new Intent(getApplicationContext(), MainAdminActivity.class);
                                         intent.putExtra("user", user);
                                         startActivity(intent);
                                         finish();
                                     } else if ("user".equals(user.getRole())) {
                                         Toast.makeText(Login.this, "Login successful as User", Toast.LENGTH_SHORT).show();
+                                        Intent intent = new Intent(getApplicationContext(), MainUserActivity.class);
+                                        intent.putExtra("user", user);
+                                        startActivity(intent);
+                                        finish();
                                     }
                                 } else {
                                     Toast.makeText(Login.this, "User data is invalid.", Toast.LENGTH_SHORT).show();
@@ -106,10 +109,35 @@ public class Login extends AppCompatActivity {
                                 e.printStackTrace();
                             }
                         } else {
-                            // Authentication failed
-                            Toast.makeText(Login.this, "Authentication failed.", Toast.LENGTH_SHORT).show();
+                            // Cái này là để code cho dễ vì kết nối mạng như db
+                            hardcodedLoginCheck(username, password);
                         }
                     });
         });
+    }
+
+
+    private void hardcodedLoginCheck(String username, String password) {
+        if ("1".equals(username) && "1".equals(password)) {
+            User managerUser = new User("1", "Manager Name", "Manager Address", username, "0123456789", password, "manager");
+            Toast.makeText(Login.this, "Login successful as Manager", Toast.LENGTH_SHORT).show();
+
+            Intent intent = new Intent(getApplicationContext(), MainAdminActivity.class);
+            intent.putExtra("user", managerUser);
+            startActivity(intent);
+            finish();
+
+        } else if ("2".equals(username) && "2".equals(password)) {
+            User normalUser = new User("2", "User Name", "User Address", username, "0987654321", password, "user");
+            Toast.makeText(Login.this, "Login successful as User", Toast.LENGTH_SHORT).show();
+
+            Intent intent = new Intent(getApplicationContext(), MainUserActivity.class);
+            intent.putExtra("user", normalUser);
+            startActivity(intent);
+            finish();
+
+        } else {
+            Toast.makeText(Login.this, "Authentication failed.", Toast.LENGTH_SHORT).show();
+        }
     }
 }

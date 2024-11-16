@@ -47,7 +47,7 @@ public class CreateAdmin extends AppCompatActivity {
         gobackBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                Intent intent = new Intent(getApplicationContext(), MainAdminActivity.class);
                 intent.putExtra("user", user);
                 startActivity(intent);
                 finish();

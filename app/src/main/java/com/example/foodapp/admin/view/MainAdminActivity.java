@@ -20,7 +20,7 @@ import com.example.foodapp.Login;
 import com.example.foodapp.R;
 import com.example.foodapp.admin.model.User;
 
-public class MainActivity extends AppCompatActivity {
+public class MainAdminActivity extends AppCompatActivity {
 
     // FirebaseAuth auth;
     TextView textView;
@@ -33,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_admin_main);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
@@ -66,7 +66,7 @@ public class MainActivity extends AppCompatActivity {
         addMenuBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(MainActivity.this, "addMenuBtn clicked", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainAdminActivity.this, "addMenuBtn clicked", Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(getApplicationContext(), AddItem.class);
                 intent.putExtra("user", user);
                 startActivity(intent);
@@ -78,7 +78,7 @@ public class MainActivity extends AppCompatActivity {
         adminProfileBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(MainActivity.this, "adminProfileBtn clicked", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainAdminActivity.this, "adminProfileBtn clicked", Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(getApplicationContext(), Admin_profile.class);
                 intent.putExtra("user", user);
                 startActivity(intent);
@@ -90,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
         viewAllMenuBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(MainActivity.this, "viewAllMenuBtn clicked", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainAdminActivity.this, "viewAllMenuBtn clicked", Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(getApplicationContext(), All_item.class);
                 intent.putExtra("user", user);
                 startActivity(intent);
@@ -102,7 +102,7 @@ public class MainActivity extends AppCompatActivity {
         deliveryBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(MainActivity.this, "deliveryBtn clicked", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainAdminActivity.this, "deliveryBtn clicked", Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(getApplicationContext(), OutForDelivery.class);
                 intent.putExtra("user", user);
                 startActivity(intent);
@@ -114,7 +114,7 @@ public class MainActivity extends AppCompatActivity {
         createAdminBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(MainActivity.this, "createAdminBtn clicked", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainAdminActivity.this, "createAdminBtn clicked", Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(getApplicationContext(), CreateAdmin.class);
                 intent.putExtra("user", user);
                 startActivity(intent);
@@ -126,7 +126,7 @@ public class MainActivity extends AppCompatActivity {
         pendingOrder.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(MainActivity.this, "pendingOrder clicked", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainAdminActivity.this, "pendingOrder clicked", Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(getApplicationContext(), PendingOrder.class);
                 intent.putExtra("user", user);
                 startActivity(intent);
@@ -138,7 +138,7 @@ public class MainActivity extends AppCompatActivity {
         viewStatisticBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(MainActivity.this, "viewStatistic clicked", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainAdminActivity.this, "viewStatistic clicked", Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(getApplicationContext(), ViewStatistic.class);
                 intent.putExtra("user", user);
                 startActivity(intent);
@@ -150,7 +150,7 @@ public class MainActivity extends AppCompatActivity {
         discountBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(MainActivity.this, "discount clicked", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainAdminActivity.this, "discount clicked", Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(getApplicationContext(), DiscountActivity.class);
                 intent.putExtra("user", user);
                 startActivity(intent);
