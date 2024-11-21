@@ -12,6 +12,7 @@ import androidx.navigation.ui.setupWithNavController
 import com.example.foodapp.R
 import com.example.foodapp.admin.model.User
 import com.example.foodapp.databinding.ActivityMainUserBinding
+import com.example.foodapp.user.Fragment.Notifaction_Bottom_Fragment
 import com.example.foodapp.user.model.UserModel
 import com.google.android.material.bottomnavigation.BottomNavigationView
 

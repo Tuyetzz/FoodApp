@@ -1,4 +1,4 @@
-package com.example.foodapp.user.view
+package com.example.foodapp.user.Fragment
 
 import android.os.Bundle
 import android.view.LayoutInflater

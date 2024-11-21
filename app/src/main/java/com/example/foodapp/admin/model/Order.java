@@ -1,42 +1,62 @@
 package com.example.foodapp.admin.model;
 
+import java.util.Date;
+import java.util.List;
+
 public class Order {
-    private String customerName;
-    private int quantity;
-    private String imageUrl;
+    private String id;
+    private User client;
+    private User manager;
     private String orderStatus;
     private String paymentType;
+    private Date orderDate; // Ngày đặt hàng
+    private List<OrderedItem> listOrderedItem;
 
-    public Order(String customerName, int quantity, String imageUrl, String orderStatus, String paymentType) {
-        this.customerName = customerName;
-        this.quantity = quantity;
-        this.imageUrl = imageUrl;
+    public Order(String id, User client, User manager, String orderStatus, String paymentType, Date orderDate, List<OrderedItem> listOrderedItem) {
+        this.id = id;
+        this.client = client;
+        this.manager = manager;
         this.orderStatus = orderStatus;
         this.paymentType = paymentType;
+        this.orderDate = orderDate; // Gán giá trị ngày đặt hàng
+        this.listOrderedItem = listOrderedItem;
     }
 
-    public String getCustomerName() {
-        return customerName;
+    @Override
+    public String toString() {
+        return "Order{" +
+                "id='" + id + '\'' +
+                ", client=" + client +
+                ", manager=" + manager +
+                ", orderStatus='" + orderStatus + '\'' +
+                ", paymentType='" + paymentType + '\'' +
+                ", orderDate=" + orderDate + // Hiển thị ngày đặt hàng
+                ", listOrderedItem=" + listOrderedItem +
+                '}';
     }
 
-    public void setCustomerName(String customerName) {
-        this.customerName = customerName;
+    public String getId() {
+        return id;
     }
 
-    public int getQuantity() {
-        return quantity;
+    public void setId(String id) {
+        this.id = id;
     }
 
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
+    public User getClient() {
+        return client;
     }
 
-    public String getImageUrl() {
-        return imageUrl;
+    public void setClient(User client) {
+        this.client = client;
     }
 
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
+    public User getManager() {
+        return manager;
+    }
+
+    public void setManager(User manager) {
+        this.manager = manager;
     }
 
     public String getOrderStatus() {
@@ -55,14 +75,19 @@ public class Order {
         this.paymentType = paymentType;
     }
 
-    @Override
-    public String toString() {
-        return "Order{" +
-                "customerName='" + customerName + '\'' +
-                ", quantity=" + quantity +
-                ", imageUrl='" + imageUrl + '\'' +
-                ", orderStatus='" + orderStatus + '\'' +
-                ", paymentType='" + paymentType + '\'' +
-                '}';
+    public Date getOrderDate() {
+        return orderDate;
+    }
+
+    public void setOrderDate(Date orderDate) {
+        this.orderDate = orderDate;
+    }
+
+    public List<OrderedItem> getListOrderedItem() {
+        return listOrderedItem;
+    }
+
+    public void setListOrderedItem(List<OrderedItem> listOrderedItem) {
+        this.listOrderedItem = listOrderedItem;
     }
 }

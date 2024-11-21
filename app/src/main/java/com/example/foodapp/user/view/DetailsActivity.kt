@@ -10,7 +10,6 @@ import androidx.core.view.WindowInsetsCompat
 import com.bumptech.glide.Glide
 import com.example.foodapp.R
 import com.example.foodapp.databinding.ActivityDetailsBinding
-import com.example.foodapp.user.model.CartItems
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 
@@ -74,16 +73,6 @@ class DetailsActivity : AppCompatActivity() {
         val database = FirebaseDatabase.getInstance().reference
         val userId = auth.currentUser?.uid ?: ""
 
-        // Tạo đối tượng cartItem
-        val cartItem = CartItems(foodName.toString(), foodPrice.toString(), foodDescriptions.toString(), foodImage.toString(), 1)
 
-        // Lưu dữ liệu vào Firebase
-        database.child("user").child(userId).child("CartItems").push().setValue(cartItem)
-            .addOnCompleteListener {
-                Toast.makeText(this, "Items added into cart successfully 😁", Toast.LENGTH_SHORT).show()
-            }
-            .addOnFailureListener {
-                Toast.makeText(this, "Item not added 😒", Toast.LENGTH_SHORT).show()
-            }
     }
 }
