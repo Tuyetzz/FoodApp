@@ -5,10 +5,13 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.foodapp.databinding.FragmentMenuBottomSheetBinding
 import com.example.foodapp.user.adapter.MenuAdapter
 import com.example.foodapp.user.model.MenuItem
+import com.example.foodapp.user.view.SharedViewModel
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.firebase.firestore.FirebaseFirestore
@@ -17,6 +20,8 @@ class MenuBottomSheetFragment : BottomSheetDialogFragment() {
 
     private var _binding: FragmentMenuBottomSheetBinding? = null
     private val binding get() = _binding!!
+
+    private val sharedViewModel: SharedViewModel by activityViewModels()
 
     private lateinit var firestore: FirebaseFirestore
     private lateinit var menuItems: MutableList<MenuItem>
@@ -27,15 +32,11 @@ class MenuBottomSheetFragment : BottomSheetDialogFragment() {
     ): View {
         _binding = FragmentMenuBottomSheetBinding.inflate(inflater, container, false)
 
-        // Nút Back để đóng BottomSheet
         binding.btnBack.setOnClickListener {
             dismiss()
         }
 
-        // Thiết lập hành vi BottomSheet
         setupBottomSheetBehavior()
-
-        // Lấy dữ liệu từ Firestore
         retrieveMenuItemsFromFirestore()
 
         return binding.root
@@ -49,8 +50,8 @@ class MenuBottomSheetFragment : BottomSheetDialogFragment() {
             if (bottomSheet != null) {
                 val behavior = BottomSheetBehavior.from(bottomSheet)
                 behavior.state = BottomSheetBehavior.STATE_EXPANDED
-                behavior.peekHeight = ViewGroup.LayoutParams.MATCH_PARENT // Đặt chiều cao tối đa
-                behavior.skipCollapsed = true // Bỏ qua trạng thái collapsed
+                behavior.peekHeight = ViewGroup.LayoutParams.MATCH_PARENT
+                behavior.skipCollapsed = true
                 Log.d("MenuBottomSheetFragment", "BottomSheet behavior configured successfully.")
             } else {
                 Log.e("MenuBottomSheetFragment", "BottomSheet view not found.")
@@ -62,10 +63,9 @@ class MenuBottomSheetFragment : BottomSheetDialogFragment() {
         firestore = FirebaseFirestore.getInstance()
         menuItems = mutableListOf()
 
-        // Hiển thị spinner khi tải dữ liệu
         showLoadingSpinner(true)
 
-        firestore.collection("items") // Thay "items" bằng tên collection trong Firestore
+        firestore.collection("items")
             .get()
             .addOnSuccessListener { documents ->
                 menuItems.clear()
@@ -73,19 +73,22 @@ class MenuBottomSheetFragment : BottomSheetDialogFragment() {
                     val menuItem = document.toObject(MenuItem::class.java)
                     menuItem?.let { menuItems.add(it) }
                 }
-                Log.d("MenuBottomSheetFragment", "Firestore: Received ${menuItems.size} items.")
+                if (menuItems.isEmpty()) {
+                    Toast.makeText(requireContext(), "No menu items found.", Toast.LENGTH_SHORT).show()
+                }
                 setAdapter()
-                showLoadingSpinner(false) // Ẩn spinner sau khi tải thành công
+                showLoadingSpinner(false)
             }
             .addOnFailureListener { exception ->
-                Log.e("MenuBottomSheetFragment", "Error retrieving data: ${exception.message}", exception)
-                showLoadingSpinner(false) // Ẩn spinner nếu có lỗi
+                Toast.makeText(requireContext(), "Error loading menu: ${exception.message}", Toast.LENGTH_SHORT).show()
+                Log.e("MenuBottomSheetFragment", "Error retrieving data", exception)
+                showLoadingSpinner(false)
             }
     }
 
     private fun setAdapter() {
         if (menuItems.isNotEmpty()) {
-            val adapter = MenuAdapter(menuItems, requireContext())
+            val adapter = MenuAdapter(menuItems, requireContext(), sharedViewModel)
             binding.menuRecyclerView.layoutManager = LinearLayoutManager(requireContext())
             binding.menuRecyclerView.adapter = adapter
             Log.d("MenuBottomSheetFragment", "Adapter set with ${menuItems.size} items.")
@@ -95,13 +98,8 @@ class MenuBottomSheetFragment : BottomSheetDialogFragment() {
     }
 
     private fun showLoadingSpinner(isLoading: Boolean) {
-        if (isLoading) {
-            binding.loadingSpinner.visibility = View.VISIBLE
-            binding.menuRecyclerView.visibility = View.GONE
-        } else {
-            binding.loadingSpinner.visibility = View.GONE
-            binding.menuRecyclerView.visibility = View.VISIBLE
-        }
+        binding.loadingSpinner.visibility = if (isLoading) View.VISIBLE else View.GONE
+        binding.menuRecyclerView.visibility = if (isLoading) View.GONE else View.VISIBLE
     }
 
     override fun onDestroyView() {

@@ -1,6 +1,10 @@
 package com.example.foodapp.user.view
 
 import android.os.Bundle
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
+import android.widget.Spinner
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
@@ -28,6 +32,28 @@ class PayOutActivity : AppCompatActivity() {
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
+        }
+
+        // Tạo danh sách các lựa chọn cho Spinner
+        val paymentMethods = arrayOf("Cash", "Card")
+
+        // Tạo adapter và liên kết với Spinner
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, paymentMethods)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+
+        binding.paymentMethodSpinner.adapter = adapter
+
+        // Xử lý sự kiện khi người dùng chọn phương thức thanh toán
+        binding.paymentMethodSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parentView: AdapterView<*>?, view: android.view.View?, position: Int, id: Long) {
+                val selectedPaymentMethod = paymentMethods[position]
+                // Xử lý sự kiện lựa chọn (ví dụ: lưu lựa chọn)
+                Toast.makeText(applicationContext, "Selected payment method: $selectedPaymentMethod", Toast.LENGTH_SHORT).show()
+            }
+
+            override fun onNothingSelected(parentView: AdapterView<*>?) {
+                // Nếu không có gì được chọn (tùy chọn xử lý)
+            }
         }
 
         // Xử lý sự kiện cho nút PlaceMyOrderBtn

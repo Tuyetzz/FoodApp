@@ -8,10 +8,12 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.foodapp.databinding.CartItemBinding
 import com.example.foodapp.user.model.OrderedItem
+import com.example.foodapp.user.view.SharedViewModel
 
 class CartAdapter(
     private val cartItems: MutableList<OrderedItem>,
     private val context: Context,
+    private val sharedViewModel: SharedViewModel, // Pass SharedViewModel to update items
     private val onCartUpdated: (OrderedItem) -> Unit
 ) : RecyclerView.Adapter<CartAdapter.CartViewHolder>() {
 
@@ -50,21 +52,24 @@ class CartAdapter(
                 plusbtn.setOnClickListener {
                     cartItem.quantity = (cartItem.quantity ?: 0) + 1
                     cartItemQuantity.text = cartItem.quantity.toString()
-                    onCartUpdated(cartItem) // Gọi callback để cập nhật tổng giỏ hàng
+                    sharedViewModel.updateOrderedItem(cartItem) // Cập nhật giỏ hàng trong SharedViewModel
+                    onCartUpdated(cartItem) // Callback để cập nhật tổng giỏ hàng
                 }
 
                 // Xử lý khi nhấn nút giảm số lượng
                 minusbtn.setOnClickListener {
+                    // Giảm số lượng tối đa 1
                     if (cartItem.quantity ?: 1 > 1) {
-                        cartItem.quantity = (cartItem.quantity ?: 1) - 1
+                        cartItem.quantity = (cartItem.quantity ?: 0) - 1
                         cartItemQuantity.text = cartItem.quantity.toString()
-                        onCartUpdated(cartItem) // Gọi callback để cập nhật tổng giỏ hàng
+                        sharedViewModel.updateOrderedItem(cartItem) // Cập nhật giỏ hàng trong SharedViewModel
+                        onCartUpdated(cartItem) // Callback để cập nhật tổng giỏ hàng
                     }
                 }
 
                 // Xử lý khi nhấn nút xóa
                 deletebtn.setOnClickListener {
-                    removeItem(adapterPosition)
+                    removeItem(adapterPosition) // Gọi hàm xóa khi nhấn nút xóa
                 }
             }
         }
@@ -73,10 +78,13 @@ class CartAdapter(
     private fun removeItem(position: Int) {
         if (position >= 0 && position < cartItems.size) {
             val removedItem = cartItems[position]
-            cartItems.removeAt(position)
-            notifyItemRemoved(position)
-            notifyItemRangeChanged(position, cartItems.size)
+            cartItems.removeAt(position) // Xóa item khỏi danh sách giỏ hàng
+            notifyItemRemoved(position) // Cập nhật RecyclerView
+            notifyItemRangeChanged(position, cartItems.size) // Thông báo thay đổi sau khi xóa
             Log.d("CartAdapter", "Removed item: $removedItem")
+
+            // Xóa món ăn khỏi giỏ hàng trong SharedViewModel
+            sharedViewModel.removeOrderedItem(removedItem)
         }
     }
 }

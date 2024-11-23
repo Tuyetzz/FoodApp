@@ -11,12 +11,13 @@ import com.example.foodapp.databinding.MenuItemBinding
 import com.example.foodapp.user.model.MenuItem
 import com.example.foodapp.user.model.OrderedItem
 import com.example.foodapp.user.view.DetailsActivity
+import com.example.foodapp.user.view.SharedViewModel
 
-class MenuAdapter(private val menuItems: List<MenuItem>, private val context: Context) :
-    RecyclerView.Adapter<MenuAdapter.MenuViewHolder>() {
-
-    // Danh sách OrderedItem để lưu trạng thái
-    private val orderedItems: ArrayList<OrderedItem> = ArrayList()
+class MenuAdapter(
+    private val menuItems: List<MenuItem>,
+    private val context: Context,
+    private val sharedViewModel: SharedViewModel
+) : RecyclerView.Adapter<MenuAdapter.MenuViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MenuViewHolder {
         val binding = MenuItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -40,7 +41,6 @@ class MenuAdapter(private val menuItems: List<MenuItem>, private val context: Co
                 }
             }
 
-            // Xử lý sự kiện nhấn vào TextView menuAddToCart
             binding.menuAddToCart.setOnClickListener {
                 val position = adapterPosition
                 if (position != RecyclerView.NO_POSITION) {
@@ -62,7 +62,8 @@ class MenuAdapter(private val menuItems: List<MenuItem>, private val context: Co
         }
 
         private fun addToOrderedItems(menuItem: MenuItem) {
-            val existingItem = orderedItems.find { it.item?.itemId == menuItem.itemId }
+            val existingItem = sharedViewModel.getOrderedItems()
+                .find { it.item?.itemId == menuItem.itemId }
 
             if (existingItem == null) {
                 val newOrderedItem = OrderedItem(
@@ -71,25 +72,23 @@ class MenuAdapter(private val menuItems: List<MenuItem>, private val context: Co
                     quantity = 1,
                     orderDate = null
                 )
-                orderedItems.add(newOrderedItem)
+                sharedViewModel.addOrderedItem(newOrderedItem)
                 Log.d("MenuAdapter", "Added new OrderedItem: $newOrderedItem")
             } else {
                 Log.d("MenuAdapter", "Item already exists in OrderedItems: $existingItem")
             }
 
-            Log.d("MenuAdapter", "OrderedItems List: $orderedItems")
+            Log.d("MenuAdapter", "Updated OrderedItems List: ${sharedViewModel.getOrderedItems()}")
         }
-
 
         fun bind(menuItem: MenuItem) {
             binding.apply {
                 menuFoodName.text = menuItem.itemName
                 menuPrice.text = "$${String.format("%.2f", menuItem.itemPrice)}"
 
-                // Load image from URL using Glide
                 Glide.with(context)
                     .load(menuItem.itemImage)
-                    .placeholder(com.example.foodapp.R.drawable.ic_logo) // Optional: Placeholder image
+                    .placeholder(com.example.foodapp.R.drawable.ic_logo)
                     .into(menuImage)
             }
         }

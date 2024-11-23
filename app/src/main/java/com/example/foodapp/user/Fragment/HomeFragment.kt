@@ -81,9 +81,9 @@ class HomeFragment : Fragment() {
     }
 
     private fun setPopularItemsAdapter(items: List<MenuItem>) {
-        val adapter = MenuAdapter(items, requireContext())
-        binding.PopularRecyclerView.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
-        binding.PopularRecyclerView.adapter = adapter
+//        val adapter = MenuAdapter(items, requireContext())
+//        binding.PopularRecyclerView.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
+//        binding.PopularRecyclerView.adapter = adapter
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

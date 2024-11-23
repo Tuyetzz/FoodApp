@@ -50,7 +50,7 @@ class SearchFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
-        adapter = MenuAdapter(filteredMenuItems, requireContext())
+        adapter = MenuAdapter(filteredMenuItems, requireContext(), sharedViewModel)
         binding.menuRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         binding.menuRecyclerView.adapter = adapter
     }
