@@ -2,10 +2,10 @@ package com.example.foodapp.admin.model;
 
 public class Discount {
 
-    private String discountId; // Unique ID for each discount
-    private String code; // Discount code
-    private float percentage; // Discount percentage
-    private String expiryDate; // Optional: Expiration date for the discount
+    private String discountId;
+    private String code;
+    private float percentage;
+    private String expiryDate;
 
     // Constructors
     public Discount() {

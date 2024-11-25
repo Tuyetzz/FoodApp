@@ -31,7 +31,7 @@
             android:fontFamily="@font/yeon_sung"
             android:layout_gravity="center"
             android:layout_marginTop="16dp"
-            android:text="Edit"
+            android:text="Pay Out"
             android:textColor="@color/textColor"
             android:textSize="20sp"
             app:layout_constraintEnd_toEndOf="parent"
@@ -61,6 +61,7 @@
                 android:textColor="@color/black" />
 
             <EditText
+                android:id="@+id/nameEditText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -96,6 +97,7 @@
 
             <EditText
                 android:layout_width="wrap_content"
+                android:id="@+id/addressEditText"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="5dp"
                 android:layout_marginBottom="5dp"
@@ -105,9 +107,9 @@
                 android:fontFamily="@font/lato"
                 android:inputType="textMultiLine"
                 android:text="Lorem ipsum is placeholder text
-commonly used in the graphic,
-print, and publishing industries
-for previewing layouts and visual "
+                commonly used in the graphic,
+                print, and publishing industries
+                for previewing layouts and visual "
                 android:textColor="@color/black" />
         </LinearLayout>
 
@@ -134,6 +136,7 @@ for previewing layouts and visual "
                 android:textColor="@color/black" />
 
             <EditText
+                android:id="@+id/phoneEditText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -176,6 +179,53 @@ for previewing layouts and visual "
 
         </LinearLayout>
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/profileedittextshape"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView26">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:fontFamily="@font/yeon_sung"
+                android:paddingLeft="8dp"
+                android:text="Discount Code"
+                android:textColor="@color/black" />
+
+            <EditText
+                android:id="@+id/discountEditText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@android:color/transparent"
+                android:ems="10"
+                android:fontFamily="@font/lato"
+                android:inputType="text"
+                android:text=""
+                android:textColor="@color/black" />
+
+            <Button
+                android:id="@+id/checkDiscountButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:padding="8dp"
+                android:backgroundTint="@color/white"
+                android:text="Check"
+                android:fontFamily="@font/yeon_sung"
+                android:textColor="@color/textColor"
+                android:textSize="14sp" />
+        </LinearLayout>
+
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -199,7 +249,8 @@ for previewing layouts and visual "
                 android:text="Total Amount"
                 android:textColor="@color/black" />
 
-            <EditText
+            <TextView
+                android:id="@+id/totalAmountTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -207,7 +258,6 @@ for previewing layouts and visual "
                 android:ems="10"
                 android:fontFamily="@font/yeon_sung"
                 android:gravity="end"
-                android:inputType="none"
                 android:paddingEnd="32dp"
                 android:text="$ 35"
                 android:textColor="@color/textColor"

@@ -33,37 +33,44 @@ class ProfileFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        //cho vao may cai edit text
+        // Observe user data and populate EditTexts
         sharedViewModel.user.observe(viewLifecycleOwner) { user ->
-            binding.fullNameEditText.setText(user.fullName)
-            binding.addressEditText.setText(user.address)
-            binding.usernameEditText.setText(user.username)
-            binding.phoneEditText.setText(user.phone)
-            binding.passwordEditText.setText(user.password)
+            user?.let {
+                binding.fullNameEditText.setText(it.fullName ?: "")
+                binding.addressEditText.setText(it.address ?: "")
+                binding.usernameEditText.setText(it.username ?: "")
+                binding.phoneEditText.setText(it.phone ?: "")
+                binding.passwordEditText.setText(it.password ?: "")
+            } ?: run {
+                Toast.makeText(requireContext(), "No user data available", Toast.LENGTH_SHORT).show()
+            }
         }
 
-        //save data
+        // Save data when the save button is clicked
         binding.saveButton.setOnClickListener {
-            val updatedUser = sharedViewModel.user.value?.copy(
-                fullName = binding.fullNameEditText.text.toString(),
-                address = binding.addressEditText.text.toString(),
-                username = binding.usernameEditText.text.toString(),
-                phone = binding.phoneEditText.text.toString(),
-                password = binding.passwordEditText.text.toString()
-            )
+            val currentUser = sharedViewModel.user.value
+            if (currentUser != null && !currentUser.id.isNullOrEmpty()) {
+                val updatedUser = currentUser.copy(
+                    fullName = binding.fullNameEditText.text.toString(),
+                    address = binding.addressEditText.text.toString(),
+                    username = binding.usernameEditText.text.toString(),
+                    phone = binding.phoneEditText.text.toString(),
+                    password = binding.passwordEditText.text.toString()
+                )
 
-            updatedUser?.let { user ->
-                sharedViewModel.setUser(user)
+                sharedViewModel.setUser(updatedUser)
 
-                // Save user data to Firestore
-                firestore.collection("users").document(user.id ?: "")
-                    .set(user)
+                // Save updated user data to Firestore
+                firestore.collection("users").document(updatedUser.id!!)
+                    .set(updatedUser)
                     .addOnSuccessListener {
                         Toast.makeText(requireContext(), "Data saved successfully", Toast.LENGTH_SHORT).show()
                     }
                     .addOnFailureListener { e ->
                         Toast.makeText(requireContext(), "Error saving data: ${e.message}", Toast.LENGTH_SHORT).show()
                     }
+            } else {
+                Toast.makeText(requireContext(), "User ID is missing or invalid", Toast.LENGTH_SHORT).show()
             }
         }
     }

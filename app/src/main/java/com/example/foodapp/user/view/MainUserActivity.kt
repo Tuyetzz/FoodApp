@@ -2,6 +2,7 @@ package com.example.foodapp.user.view
 
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -25,9 +26,8 @@ class MainUserActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Retrieve the user object from the Intent, handling both Parcelable (Kotlin) and Serializable (Java)
+        // Retrieve the user object from the Intent
         user = intent.getParcelableExtra("user") ?: run {
-            // If "user" was passed as Serializable, convert it to UserModel
             (intent.getSerializableExtra("user") as? User)?.let {
                 UserModel(
                     id = it.id,
@@ -41,13 +41,13 @@ class MainUserActivity : AppCompatActivity() {
             }
         }
 
-        // Set user data in the ViewModel
+        // Set user data in ViewModel
         user?.let {
             sharedViewModel.setUser(it)
             logUserInfo(it)
         } ?: Log.d("MainUserActivity", "User data not found in intent")
 
-        // Rest of your setup code
+        // Setup layout and navigation
         WindowCompat.setDecorFitsSystemWindows(window, false)
         binding = ActivityMainUserBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -62,10 +62,28 @@ class MainUserActivity : AppCompatActivity() {
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNavigationView)
         bottomNav.setupWithNavController(navController)
 
+        // Check for the notification flag
+        val showNotification = intent.getBooleanExtra("showOrderPlacedNotification", false)
+        if (showNotification) {
+            showOrderPlacedNotification()
+        }
+
+        // Handle notification button
         binding.notificationBtn.setOnClickListener {
             val bottomSheetDialog = Notifaction_Bottom_Fragment()
-            bottomSheetDialog.show(supportFragmentManager, "Test")
+            bottomSheetDialog.show(supportFragmentManager, "NotificationFragment")
         }
+    }
+
+    private fun showOrderPlacedNotification() {
+        // Show a toast notification
+        Toast.makeText(this, "Congrats! Your order has been placed successfully.", Toast.LENGTH_SHORT).show()
+
+        // Optionally display a bottom sheet for detailed notification
+        val notificationFragment = Notifaction_Bottom_Fragment.newInstance(
+            "Congrats! Your order has been placed successfully.", R.drawable.illustration
+        )
+        notificationFragment.show(supportFragmentManager, "OrderPlacedNotification")
     }
 
     private fun logUserInfo(user: UserModel) {

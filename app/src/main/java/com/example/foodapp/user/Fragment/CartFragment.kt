@@ -2,6 +2,7 @@ package com.example.foodapp.user.Fragment
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import android.view.LayoutInflater
@@ -10,75 +11,109 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.foodapp.databinding.FragmentCartBinding
 import com.example.foodapp.user.adapter.CartAdapter
+import com.example.foodapp.user.model.Order
 import com.example.foodapp.user.model.OrderedItem
 import com.example.foodapp.user.view.PayOutActivity
 import com.example.foodapp.user.view.SharedViewModel
 
 class CartFragment : Fragment() {
 
-    private lateinit var binding: FragmentCartBinding
+    private var _binding: FragmentCartBinding? = null
+    private val binding get() = _binding!!
+
     private lateinit var orderedItems: MutableList<OrderedItem>
 
-    // SharedViewModel để lấy và lưu trạng thái giỏ hàng
+    // SharedViewModel để quản lý trạng thái chung
     private val sharedViewModel: SharedViewModel by activityViewModels()
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        // Quan sát sự thay đổi của orderedItems trong ViewModel
-        sharedViewModel.orderedItems.observe(this) { items ->
-            orderedItems = items.toMutableList()
-            updateCartUI() // Cập nhật giao diện khi giỏ hàng thay đổi
-        }
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        binding = FragmentCartBinding.inflate(inflater, container, false)
-
-        // Lấy danh sách OrderedItems từ SharedViewModel (giỏ hàng)
-        fetchCartItems()
-
-        // Xử lý khi nhấn nút Proceed
-        binding.proceedBtn.setOnClickListener {
-            val intent = Intent(requireContext(), PayOutActivity::class.java)
-            startActivity(intent)
-        }
-
+    ): View {
+        _binding = FragmentCartBinding.inflate(inflater, container, false)
         return binding.root
     }
 
-    // Lấy danh sách OrderedItems từ SharedViewModel
-    private fun fetchCartItems() {
-        orderedItems = sharedViewModel.getOrderedItems().toMutableList()
-        updateCartUI()
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        setupRecyclerView()
+
+        // Lấy danh sách OrderedItems từ SharedViewModel
+        sharedViewModel.orderedItems.observe(viewLifecycleOwner) { items ->
+            orderedItems = items.toMutableList()
+            updateRecyclerView()
+        }
+
+        // Xử lý khi nhấn nút Proceed
+        binding.proceedBtn.setOnClickListener {
+            createOrder()
+        }
     }
 
-    // Cập nhật giao diện giỏ hàng
-    private fun updateCartUI() {
-        val layoutManager = LinearLayoutManager(requireContext())
-        binding.cartRecyclerView.layoutManager = layoutManager
+    private fun setupRecyclerView() {
+        binding.cartRecyclerView.layoutManager = LinearLayoutManager(requireContext())
+    }
 
-        // Sử dụng CartAdapter với danh sách OrderedItems
+    private fun updateRecyclerView() {
         binding.cartRecyclerView.adapter = CartAdapter(orderedItems, requireContext(), sharedViewModel) { updatedItem ->
-            // Callback khi giỏ hàng được cập nhật
             handleCartUpdate(updatedItem)
         }
     }
 
-    // Xử lý khi giỏ hàng được cập nhật
     private fun handleCartUpdate(updatedItem: OrderedItem) {
         val existingItem = orderedItems.find { it.id == updatedItem.id }
         if (existingItem != null) {
-            // Cập nhật số lượng hoặc các thuộc tính khác của món ăn trong giỏ hàng
             existingItem.quantity = updatedItem.quantity
-            sharedViewModel.updateOrderedItem(existingItem) // Cập nhật lại trong ViewModel
+            sharedViewModel.updateOrderedItem(existingItem)
         } else {
-            // Nếu món không tồn tại trong giỏ hàng, thêm mới
             sharedViewModel.addOrderedItem(updatedItem)
         }
+    }
+
+    private fun createOrder() {
+        val client = sharedViewModel.user.value
+
+        if (client == null) {
+            Log.e("CartFragment", "Cannot create order: Client is null.")
+            return
+        }
+
+        val order = Order(
+            client = client,
+            manager = null,
+            listOrderedItem = orderedItems,
+            orderStatus = "Ready",
+            paymentType = null,
+            discount = null
+        )
+
+        logOrderDetails(order)
+
+        // Truyền Order qua Intent
+        val intent = Intent(requireContext(), PayOutActivity::class.java)
+        intent.putExtra("order", order) // Order phải implement Parcelable
+        startActivity(intent)
+    }
+
+
+    private fun logOrderDetails(order: Order) {
+        Log.d("CartFragment", "Order Details:")
+        Log.d("CartFragment", "Client: ${order.client?.fullName ?: "No client"}")
+        order.listOrderedItem?.forEach { item ->
+            Log.d(
+                "CartFragment",
+                "OrderedItem ID: ${item.id}, Name: ${item.item?.itemName}, Quantity: ${item.quantity}"
+            )
+        }
+        Log.d("CartFragment", "Order Status: ${order.orderStatus}")
+        Log.d("CartFragment", "Payment Type: ${order.paymentType ?: "No payment type"}")
+        Log.d("CartFragment", "Discount: ${order.discount ?: "No discount"}")
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
     companion object {

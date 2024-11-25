@@ -26,7 +26,7 @@ public class MainAdminActivity extends AppCompatActivity {
     TextView textView;
     // FirebaseUser user;
     Button logoutBtn, addMenuBtn, adminProfileBtn, viewAllMenuBtn, deliveryBtn, createAdminBtn, viewStatisticBtn, discountBtn;
-    LinearLayout pendingOrder;
+    LinearLayout pendingOrder, completeOrder;
 
     @SuppressLint("MissingInflatedId")
     @Override
@@ -128,6 +128,18 @@ public class MainAdminActivity extends AppCompatActivity {
             public void onClick(View view) {
                 Toast.makeText(MainAdminActivity.this, "pendingOrder clicked", Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(getApplicationContext(), PendingOrder.class);
+                intent.putExtra("user", user);
+                startActivity(intent);
+                finish();
+            }
+        });
+
+        completeOrder = findViewById(R.id.CompleteOrder);
+        completeOrder.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Toast.makeText(MainAdminActivity.this, "completeOrder clicked", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(getApplicationContext(), CompleteOrder.class);
                 intent.putExtra("user", user);
                 startActivity(intent);
                 finish();

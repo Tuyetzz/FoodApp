@@ -15,7 +15,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Material3.Light"
         tools:targetApi="31">
-
+        <activity
+            android:name=".admin.view.CompleteOrder"
+            android:exported="false" />
         <activity
             android:name=".admin.view.DiscountActivity"
             android:exported="false" />
@@ -56,13 +58,7 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
-
-        <!-- Activities in the user package -->
-
-        <activity
-            android:name=".user.view.ChooseLocationActivity"
-            android:exported="false" />
+        </activity> <!-- Activities in the user package -->
         <activity
             android:name=".user.view.PayOutActivity"
             android:exported="false" />
@@ -71,8 +67,8 @@
             android:exported="false" />
         <activity
             android:name=".user.view.MainUserActivity"
-            android:windowSoftInputMode="adjustPan"
-            android:exported="false" />
+            android:exported="false"
+            android:windowSoftInputMode="adjustPan" />
 
         <meta-data
             android:name="preloaded_fonts"

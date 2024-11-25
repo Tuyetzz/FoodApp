@@ -10,5 +10,6 @@ data class Order(
     var manager: UserModel? = null,
     var listOrderedItem: List<OrderedItem>? = null,
     var orderStatus: String? = null,
-    var paymentType: String? = null
+    var paymentType: String? = null,
+    var discount: Discount? = null
 ) : Parcelable

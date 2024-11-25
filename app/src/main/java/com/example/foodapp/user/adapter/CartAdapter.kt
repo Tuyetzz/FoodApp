@@ -33,16 +33,9 @@ class CartAdapter(
 
         fun bind(cartItem: OrderedItem) {
             binding.apply {
-                // Set tên món ăn
                 cartFoodName.text = cartItem.item?.itemName ?: "Unknown"
-
-                // Set giá món ăn
                 cartItemPrice.text = "$${String.format("%.2f", cartItem.item?.itemPrice ?: 0.0)}"
-
-                // Set số lượng món ăn
                 cartItemQuantity.text = cartItem.quantity.toString()
-
-                // Set hình ảnh món ăn
                 Glide.with(context)
                     .load(cartItem.item?.itemImage)
                     .placeholder(com.example.foodapp.R.drawable.ic_logo) // Placeholder nếu không tải được ảnh
@@ -54,6 +47,7 @@ class CartAdapter(
                     cartItemQuantity.text = cartItem.quantity.toString()
                     sharedViewModel.updateOrderedItem(cartItem) // Cập nhật giỏ hàng trong SharedViewModel
                     onCartUpdated(cartItem) // Callback để cập nhật tổng giỏ hàng
+                    logOrderedItems() // Log trạng thái giỏ hàng sau khi thay đổi
                 }
 
                 // Xử lý khi nhấn nút giảm số lượng
@@ -64,12 +58,14 @@ class CartAdapter(
                         cartItemQuantity.text = cartItem.quantity.toString()
                         sharedViewModel.updateOrderedItem(cartItem) // Cập nhật giỏ hàng trong SharedViewModel
                         onCartUpdated(cartItem) // Callback để cập nhật tổng giỏ hàng
+                        logOrderedItems() // Log trạng thái giỏ hàng sau khi thay đổi
                     }
                 }
 
                 // Xử lý khi nhấn nút xóa
                 deletebtn.setOnClickListener {
                     removeItem(adapterPosition) // Gọi hàm xóa khi nhấn nút xóa
+                    logOrderedItems() // Log trạng thái giỏ hàng sau khi thay đổi
                 }
             }
         }
@@ -85,6 +81,14 @@ class CartAdapter(
 
             // Xóa món ăn khỏi giỏ hàng trong SharedViewModel
             sharedViewModel.removeOrderedItem(removedItem)
+        }
+    }
+
+    // Log tất cả các OrderedItem trong giỏ hàng
+    private fun logOrderedItems() {
+        Log.d("CartAdapter", "Current cart items:")
+        for (item in cartItems) {
+            Log.d("CartAdapter", "Item: ${item.item?.itemName}, Quantity: ${item.quantity}")
         }
     }
 }

@@ -2,7 +2,6 @@ package com.example.foodapp.admin.view;
 
 import android.content.Intent;
 import android.os.Bundle;
-
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
@@ -12,51 +11,61 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.foodapp.R;
-import com.example.foodapp.admin.adapter.OrderRecViewAdapter;
+import com.example.foodapp.admin.model.Item;
 import com.example.foodapp.admin.model.Order;
 import com.example.foodapp.admin.model.OrderedItem;
 import com.example.foodapp.admin.model.User;
-import com.example.foodapp.admin.model.Item;
+import com.example.foodapp.admin.adapter.CompleteOrderAdapter;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-public class PendingOrder extends AppCompatActivity {
+public class CompleteOrder extends AppCompatActivity {
 
     private FloatingActionButton gobackBtn;
-    private RecyclerView orderRecyclerView;
-    private OrderRecViewAdapter adapter;
+    private RecyclerView recyclerView;
+    private CompleteOrderAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_pending_order);
+        setContentView(R.layout.activity_complete_order);
 
-        // Áp dụng insets để giao diện tương thích với thiết bị không viền
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
 
-        // Lấy thông tin user từ intent
+        // Retrieve the manager user from Intent
         User user = (User) getIntent().getSerializableExtra("user");
+
+        // Nạp dữ liệu mẫu
+        List<Order> sampleOrders = new ArrayList<>();
+        if (user != null) {
+            sampleOrders = loadSampleOrders(user); // Nạp dữ liệu đầy đủ
+        }
+
+        // Lọc trạng thái "Completed"
+        List<Order> completedOrders = filterOrdersByStatus(sampleOrders, "Completed");
+
+        // Khởi tạo RecyclerView và Adapter
+        recyclerView = findViewById(R.id.completeOrderRecyclerView);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        adapter = new CompleteOrderAdapter(completedOrders); // Gán danh sách đã lọc vào adapter
+        recyclerView.setAdapter(adapter);
 
         gobackBtn = findViewById(R.id.goback);
         gobackBtn.setOnClickListener(view -> navigateBackToMainAdmin(user));
-
-        // Khởi tạo RecyclerView
-        setupRecyclerView();
-
-        // Thêm dữ liệu mẫu
-        loadSampleOrders(user);
     }
+
+
+
 
     private void navigateBackToMainAdmin(User user) {
         Intent intent = new Intent(getApplicationContext(), MainAdminActivity.class);
@@ -65,29 +74,32 @@ public class PendingOrder extends AppCompatActivity {
         finish();
     }
 
-    private void setupRecyclerView() {
-        orderRecyclerView = findViewById(R.id.orderRecyclerView);
-        orderRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new OrderRecViewAdapter(this);
-        orderRecyclerView.setAdapter(adapter);
+    private List<Order> filterOrdersByStatus(List<Order> orders, String status) {
+        ArrayList<Order> filteredOrders = new ArrayList<>();
+        for (Order order : orders) {
+            if (status.equalsIgnoreCase(order.getOrderStatus())) {
+                filteredOrders.add(order);
+            }
+        }
+        return filteredOrders;
     }
 
-    private void loadSampleOrders(User manager) {
+    private List<Order> loadSampleOrders(User manager) {
         ArrayList<Order> allOrders = new ArrayList<>();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
         try {
-            // Tạo các ngày cụ thể
+            // Create specific dates
             Date orderDate1 = dateFormat.parse("2024-11-21");
             Date orderDate2 = dateFormat.parse("2024-11-20");
             Date orderDate3 = dateFormat.parse("2024-11-19");
 
-            // Tạo dữ liệu mẫu cho các món ăn
+            // Sample items
             Item item1 = new Item("item1", "Burger", 5.99, "https://botocuchigiasi.vn/wp-content/uploads/2022/02/pho-bo.jpg", "Delicious beef burger", new ArrayList<>(List.of("Beef", "Bread", "Lettuce")));
             Item item2 = new Item("item2", "Pizza", 8.99, "https://botocuchigiasi.vn/wp-content/uploads/2022/02/pho-bo.jpg", "Cheesy pizza", new ArrayList<>(List.of("Cheese", "Tomato", "Bread")));
             Item item3 = new Item("item3", "Soda", 1.99, "https://botocuchigiasi.vn/wp-content/uploads/2022/02/pho-bo.jpg", "Refreshing soda", new ArrayList<>(List.of("Water", "Sugar", "Flavoring")));
 
-            // Tạo danh sách OrderedItem
+            // Ordered Items
             List<OrderedItem> orderedItems1 = List.of(
                     new OrderedItem("orderedItem1", item1, 2),
                     new OrderedItem("orderedItem2", item2, 1)
@@ -96,26 +108,16 @@ public class PendingOrder extends AppCompatActivity {
                     new OrderedItem("orderedItem3", item3, 3)
             );
 
-            // Thêm các đơn hàng mẫu với `orderDate` cụ thể
-            allOrders.add(new Order("order1", new User("client1", "John Doe", "123 Main St", "johndoe", "123456789", "password", "client"), manager, "Pending", "Cash", orderDate1, orderedItems1));
-            allOrders.add(new Order("order2", new User("client2", "Jane Smith", "456 Elm St", "janesmith", "987654321", "password", "client"), manager, "Not delivery", "Card", orderDate2, orderedItems2));
-            allOrders.add(new Order("order3", new User("client3", "Michael Brown", "789 Oak St", "michaelbrown", "123987654", "password", "client"), manager, "Completed", "Cash", orderDate3, orderedItems1));
-
-            // Lọc các đơn hàng có trạng thái "Ready"
-            ArrayList<Order> filteredOrders = new ArrayList<>();
-            for (Order order : allOrders) {
-                if ("Pending".equalsIgnoreCase(order.getOrderStatus())) {
-                    filteredOrders.add(order);
-                }
-            }
-
-            // Cập nhật dữ liệu vào adapter
-            adapter.setOrders(filteredOrders);
+            // Sample orders
+            allOrders.add(new Order("order1", new User("client1", "John Doe", "123 Main St", "johndoe", "123456789", "password", "client"), manager, "Completed", "Cash", orderDate1, orderedItems1));
+            allOrders.add(new Order("order2", new User("client2", "Jane Smith", "456 Elm St", "janesmith", "987654321", "password", "client"), manager, "Completed", "Card", orderDate2, orderedItems2));
+            allOrders.add(new Order("order3", new User("client3", "Michael Brown", "789 Oak St", "michaelbrown", "123987654", "password", "client"), manager, "Ready", "Cash", orderDate3, orderedItems1));
 
         } catch (ParseException e) {
             e.printStackTrace();
         }
-    }
 
+        return allOrders;
+    }
 
 }
