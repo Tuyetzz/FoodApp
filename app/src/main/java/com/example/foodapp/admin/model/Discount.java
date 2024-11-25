@@ -1,6 +1,8 @@
 package com.example.foodapp.admin.model;
 
-public class Discount {
+import java.io.Serializable;
+
+public class Discount implements Serializable {
 
     private String discountId;
     private String code;

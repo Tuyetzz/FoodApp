@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.foodapp.R;
 import com.example.foodapp.admin.model.Order;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 
@@ -21,9 +22,11 @@ public class DeliveryRecViewAdapter extends RecyclerView.Adapter<DeliveryRecView
 
     private ArrayList<Order> orders = new ArrayList<>();
     private Context context;
+    private FirebaseFirestore db;
 
     public DeliveryRecViewAdapter(Context context) {
         this.context = context;
+        this.db = FirebaseFirestore.getInstance(); // Khởi tạo Firestore
     }
 
     @NonNull
@@ -44,7 +47,6 @@ public class DeliveryRecViewAdapter extends RecyclerView.Adapter<DeliveryRecView
 
         // Kiểm tra trạng thái đơn hàng và cập nhật giao diện
         if (currentOrder.getOrderStatus().equalsIgnoreCase("Not Delivered")) {
-            // Trạng thái "Not Delivered"
             holder.txtDelivered.setText("Not Delivered");
             holder.txtDeliveryStatus.setText("Not Recieved");
             holder.txtDeliveryStatus.setTextColor(context.getResources().getColor(android.R.color.holo_red_dark));
@@ -52,35 +54,50 @@ public class DeliveryRecViewAdapter extends RecyclerView.Adapter<DeliveryRecView
             holder.statusButton.setBackgroundColor(context.getResources().getColor(android.R.color.holo_red_dark));
             holder.statusButton.setText("");
         } else if (currentOrder.getOrderStatus().equalsIgnoreCase("Delivered")) {
-            // Trạng thái "Delivered"
             holder.txtDelivered.setText("Delivered");
             holder.txtDeliveryStatus.setText("Recieved");
             holder.txtDeliveryStatus.setTextColor(context.getResources().getColor(android.R.color.holo_green_dark));
             holder.txtDelivered.setTextColor(context.getResources().getColor(android.R.color.holo_green_dark));
             holder.statusButton.setBackgroundColor(context.getResources().getColor(android.R.color.holo_green_dark));
-            holder.statusButton.setText("Complete"); // Text "Complete"
+            holder.statusButton.setText("Complete");
         }
 
         // Xử lý sự kiện khi nhấn nút "statusButton"
         holder.statusButton.setOnClickListener(v -> {
             if (currentOrder.getOrderStatus().equalsIgnoreCase("Not Delivered")) {
                 // Chuyển trạng thái từ "Not Delivered" sang "Delivered"
-                currentOrder.setOrderStatus("Delivered");
-                Toast.makeText(context, "Marked as Delivered for " + currentOrder.getClient().getFullName(), Toast.LENGTH_SHORT).show();
-                notifyItemChanged(position); // Làm mới item
+                updateOrderStatus(currentOrder.getId(), "Delivered", position);
             } else if (currentOrder.getOrderStatus().equalsIgnoreCase("Delivered")) {
                 // Chuyển trạng thái từ "Delivered" sang "Completed"
-                currentOrder.setOrderStatus("Completed");
-                Toast.makeText(context, "Marked as Completed for " + currentOrder.getClient().getFullName(), Toast.LENGTH_SHORT).show();
-                removeOrder(position); // Xóa item nếu đã "Completed"
+                updateOrderStatus(currentOrder.getId(), "Completed", position);
             }
         });
 
-        // Sự kiện khi bấm vào toàn bộ CardView
         holder.parent.setOnClickListener(v -> {
             Toast.makeText(context, currentOrder.getClient().getFullName() + " Selected", Toast.LENGTH_SHORT).show();
         });
     }
+
+    // Hàm cập nhật trạng thái đơn hàng lên Firestore
+    private void updateOrderStatus(String orderId, String newStatus, int position) {
+        db.collection("orders").document(orderId)
+                .update("orderStatus", newStatus)
+                .addOnSuccessListener(aVoid -> {
+                    orders.get(position).setOrderStatus(newStatus); // Cập nhật trạng thái trong danh sách
+                    if (newStatus.equalsIgnoreCase("Completed")) {
+                        removeOrder(position); // Xóa đơn hàng nếu trạng thái là "Completed"
+                    } else {
+                        notifyItemChanged(position); // Làm mới item nếu chỉ thay đổi trạng thái
+                    }
+                    Toast.makeText(context, "Order status updated to " + newStatus, Toast.LENGTH_SHORT).show();
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(context, "Failed to update order status.", Toast.LENGTH_SHORT).show();
+                    e.printStackTrace();
+                });
+    }
+
+    // Xóa đơn hàng khỏi danh sách
     private void removeOrder(int position) {
         if (position >= 0 && position < orders.size()) {
             orders.remove(position); // Xóa đơn hàng khỏi danh sách
@@ -88,9 +105,6 @@ public class DeliveryRecViewAdapter extends RecyclerView.Adapter<DeliveryRecView
             notifyItemRangeChanged(position, orders.size()); // Cập nhật lại các vị trí
         }
     }
-
-
-
 
     @Override
     public int getItemCount() {
@@ -117,5 +131,4 @@ public class DeliveryRecViewAdapter extends RecyclerView.Adapter<DeliveryRecView
             parent = itemView.findViewById(R.id.parent);
         }
     }
-
 }

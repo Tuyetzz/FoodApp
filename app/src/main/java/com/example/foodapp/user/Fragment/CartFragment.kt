@@ -23,7 +23,7 @@ class CartFragment : Fragment() {
 
     private lateinit var orderedItems: MutableList<OrderedItem>
 
-    // SharedViewModel để quản lý trạng thái chung
+    //lay tu sharedViewModel
     private val sharedViewModel: SharedViewModel by activityViewModels()
 
     override fun onCreateView(
@@ -45,7 +45,6 @@ class CartFragment : Fragment() {
             updateRecyclerView()
         }
 
-        // Xử lý khi nhấn nút Proceed
         binding.proceedBtn.setOnClickListener {
             createOrder()
         }
@@ -90,9 +89,9 @@ class CartFragment : Fragment() {
 
         logOrderDetails(order)
 
-        // Truyền Order qua Intent
+
         val intent = Intent(requireContext(), PayOutActivity::class.java)
-        intent.putExtra("order", order) // Order phải implement Parcelable
+        intent.putExtra("order", order)
         startActivity(intent)
     }
 

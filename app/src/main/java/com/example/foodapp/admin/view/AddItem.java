@@ -76,42 +76,35 @@ public class AddItem extends AppCompatActivity {
         submitButton.setOnClickListener(view -> addItemToList());
     }
 
-    // Method to add item to list and save to Firebase Firestore
     private void addItemToList() {
-        // Retrieve data from input fields
         String itemName = itemNameInput.getText().toString();
         String itemPriceStr = itemPriceInput.getText().toString();
         String imageUrl = imageUrlInput.getText().toString();
         String shortDescription = shortDescriptionInput.getText().toString();
         String ingredientsStr = ingredientsInput.getText().toString();
         Toast.makeText(this, "Chay den day roi", Toast.LENGTH_SHORT).show();
-        // Validate input data
+        //check
         if (itemName.isEmpty() || itemPriceStr.isEmpty()) {
             Toast.makeText(this, "Please fill in all required fields", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Convert price to double
         double itemPrice = Double.parseDouble(itemPriceStr);
 
-        // Split ingredients by newline and add to list
         ArrayList<String> ingredients = new ArrayList<>();
         for (String ingredient : ingredientsStr.split("\n")) {
             ingredients.add(ingredient.trim());
         }
 
-        // Create a new Item object
         Item newItem = new Item();
         newItem.setItemName(itemName);
         newItem.setItemPrice(itemPrice);
         newItem.setItemImage(imageUrl);
         newItem.setShortDescription(shortDescription);
         newItem.setIngredients(ingredients);
-
-        // Add item to local list
         itemsList.add(newItem);
 
-        // Save item to Firebase Firestore
+        // save
         db.collection("items")
                 .add(newItem)
                 .addOnSuccessListener(documentReference -> {

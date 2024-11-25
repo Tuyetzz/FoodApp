@@ -1,16 +1,21 @@
 package com.example.foodapp.admin.model;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
-public class Order {
+public class Order implements Serializable {
     private String id;
     private User client;
     private User manager;
     private String orderStatus;
     private String paymentType;
-    private Date orderDate; // Ngày đặt hàng
+    private Date orderDate;
     private List<OrderedItem> listOrderedItem;
+
+    public Order() {
+        
+    }
 
     public Order(String id, User client, User manager, String orderStatus, String paymentType, Date orderDate, List<OrderedItem> listOrderedItem) {
         this.id = id;

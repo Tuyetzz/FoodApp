@@ -1,6 +1,8 @@
 package com.example.foodapp.admin.model;
 
-public class ItemStat {
+import java.io.Serializable;
+
+public class ItemStat implements Serializable {
     private double revenue;
     private double sellRate;
 

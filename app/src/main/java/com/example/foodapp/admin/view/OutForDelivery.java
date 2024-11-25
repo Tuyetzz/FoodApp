@@ -13,16 +13,18 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.foodapp.R;
 import com.example.foodapp.admin.adapter.DeliveryRecViewAdapter;
-import com.example.foodapp.admin.model.Item;
 import com.example.foodapp.admin.model.Order;
 import com.example.foodapp.admin.model.OrderedItem;
 import com.example.foodapp.admin.model.User;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
 
 public class OutForDelivery extends AppCompatActivity {
 
@@ -30,6 +32,7 @@ public class OutForDelivery extends AppCompatActivity {
     private FloatingActionButton gobackBtn;
     private DeliveryRecViewAdapter adapter;
     private User user; // Biến toàn cục
+    private FirebaseFirestore db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,16 +48,13 @@ public class OutForDelivery extends AppCompatActivity {
         });
 
         user = (User) getIntent().getSerializableExtra("user");
+        db = FirebaseFirestore.getInstance();
 
         setupGoBackButton();
-
         setupRecyclerView();
 
-        List<Order> orders = loadSampleOrders();
-
-        List<Order> filteredOrders = filterOrdersForDelivery(orders);
-
-        adapter.setOrders(new ArrayList<>(filteredOrders));
+        // Lấy dữ liệu từ Firestore
+        loadOrdersFromFirestore();
     }
 
     private void setupGoBackButton() {
@@ -74,44 +74,52 @@ public class OutForDelivery extends AppCompatActivity {
         deliveryRecView.setAdapter(adapter);
     }
 
-    private List<Order> loadSampleOrders() {
-        List<Order> orders = new ArrayList<>();
-
-        // Tạo dữ liệu mẫu cho các món ăn
-        Item item1 = new Item("item1", "Burger", 5.99, "https://example.com/burger.jpg", "Delicious beef burger", new ArrayList<>(List.of("Beef", "Bread", "Lettuce")));
-        Item item2 = new Item("item2", "Pizza", 8.99, "https://example.com/pizza.jpg", "Cheesy pizza", new ArrayList<>(List.of("Cheese", "Tomato", "Bread")));
-        Item item3 = new Item("item3", "Soda", 1.99, "https://example.com/soda.jpg", "Refreshing soda", new ArrayList<>(List.of("Water", "Sugar", "Flavoring")));
-
-        // Tạo danh sách OrderedItem
-        List<OrderedItem> orderedItems1 = List.of(
-                new OrderedItem("orderedItem1", item1, 2),
-                new OrderedItem("orderedItem2", item2, 1)
-        );
-
-        List<OrderedItem> orderedItems2 = List.of(
-                new OrderedItem("orderedItem3", item3, 3)
-        );
-
-        // Tạo các ngày đặt hàng cụ thể
-        Date orderDate1 = new Date(); // Ngày hiện tại
-        Date orderDate2 = new Date(orderDate1.getTime() - 24 * 60 * 60 * 1000); // Hôm qua
-        Date orderDate3 = new Date(orderDate1.getTime() - 48 * 60 * 60 * 1000); // Hai ngày trước
-
-        // Tạo danh sách đơn hàng
-        orders.add(new Order("order1", new User("1", "John Doe", "123 Main St", "johndoe", "123456789", "password", "client"),
-                user, "Not Delivered", "Cash", orderDate1, orderedItems1));
-        orders.add(new Order("order2", new User("2", "Jane Smith", "456 Elm St", "janesmith", "987654321", "password", "client"),
-                user, "Delivered", "Cash", orderDate2, orderedItems2));
-        orders.add(new Order("order3", new User("3", "Michael Brown", "789 Pine St", "michaelbrown", "987651234", "password", "client"),
-                user, "Ready", "Card", orderDate3, orderedItems1));
-
-        return orders;
+    private void loadOrdersFromFirestore() {
+        db.collection("orders")
+                .whereIn("orderStatus", List.of("Not Delivered", "Delivered")) // Chỉ lấy các trạng thái liên quan
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    List<Order> orders = new ArrayList<>();
+                    for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
+                        Order order = parseOrder(document);
+                        if (order != null) {
+                            orders.add(order);
+                        }
+                    }
+                    adapter.setOrders(new ArrayList<>(orders));
+                })
+                .addOnFailureListener(e -> {
+                    e.printStackTrace();
+                });
     }
 
+    private Order parseOrder(QueryDocumentSnapshot document) {
+        try {
+            // Parse client data
+            Map<String, Object> clientMap = (Map<String, Object>) document.get("client");
+            User client = clientMap != null ? new User(clientMap) : null;
 
-    private List<Order> filterOrdersForDelivery(List<Order> orders) {
-        return orders.stream()
-                .filter(order -> order.getOrderStatus().equals("Not Delivered") || order.getOrderStatus().equals("Delivered"))
-                .collect(Collectors.toList());
+            // Parse ordered items
+            List<Map<String, Object>> orderedItemsList = (List<Map<String, Object>>) document.get("listOrderedItem");
+            List<OrderedItem> orderedItems = new ArrayList<>();
+            if (orderedItemsList != null) {
+                for (Map<String, Object> itemMap : orderedItemsList) {
+                    orderedItems.add(new OrderedItem(itemMap));
+                }
+            }
+
+            return new Order(
+                    document.getId(),                 // Order ID
+                    client,                           // Client
+                    user,                             // Manager từ Intent
+                    document.getString("orderStatus"), // Order status
+                    document.getString("paymentType"), // Payment type
+                    document.getDate("orderDate") != null ? document.getDate("orderDate") : new Date(), // Order date
+                    orderedItems                      // List of ordered items
+            );
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }

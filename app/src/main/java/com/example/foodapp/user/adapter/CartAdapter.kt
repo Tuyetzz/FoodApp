@@ -13,7 +13,7 @@ import com.example.foodapp.user.view.SharedViewModel
 class CartAdapter(
     private val cartItems: MutableList<OrderedItem>,
     private val context: Context,
-    private val sharedViewModel: SharedViewModel, // Pass SharedViewModel to update items
+    private val sharedViewModel: SharedViewModel,
     private val onCartUpdated: (OrderedItem) -> Unit
 ) : RecyclerView.Adapter<CartAdapter.CartViewHolder>() {
 
@@ -38,27 +38,26 @@ class CartAdapter(
                 cartItemQuantity.text = cartItem.quantity.toString()
                 Glide.with(context)
                     .load(cartItem.item?.itemImage)
-                    .placeholder(com.example.foodapp.R.drawable.ic_logo) // Placeholder nếu không tải được ảnh
+                    .placeholder(com.example.foodapp.R.drawable.ic_logo) //neu ko co anh
                     .into(cartImage)
 
-                // Xử lý khi nhấn nút tăng số lượng
+                //tang so luong
                 plusbtn.setOnClickListener {
                     cartItem.quantity = (cartItem.quantity ?: 0) + 1
                     cartItemQuantity.text = cartItem.quantity.toString()
-                    sharedViewModel.updateOrderedItem(cartItem) // Cập nhật giỏ hàng trong SharedViewModel
-                    onCartUpdated(cartItem) // Callback để cập nhật tổng giỏ hàng
-                    logOrderedItems() // Log trạng thái giỏ hàng sau khi thay đổi
+                    sharedViewModel.updateOrderedItem(cartItem)
+                    onCartUpdated(cartItem)
+                    logOrderedItems()
                 }
 
-                // Xử lý khi nhấn nút giảm số lượng
+                //giam so luong
                 minusbtn.setOnClickListener {
-                    // Giảm số lượng tối đa 1
                     if (cartItem.quantity ?: 1 > 1) {
                         cartItem.quantity = (cartItem.quantity ?: 0) - 1
                         cartItemQuantity.text = cartItem.quantity.toString()
-                        sharedViewModel.updateOrderedItem(cartItem) // Cập nhật giỏ hàng trong SharedViewModel
-                        onCartUpdated(cartItem) // Callback để cập nhật tổng giỏ hàng
-                        logOrderedItems() // Log trạng thái giỏ hàng sau khi thay đổi
+                        sharedViewModel.updateOrderedItem(cartItem)
+                        onCartUpdated(cartItem)
+                        logOrderedItems()
                     }
                 }
 
@@ -74,12 +73,11 @@ class CartAdapter(
     private fun removeItem(position: Int) {
         if (position >= 0 && position < cartItems.size) {
             val removedItem = cartItems[position]
-            cartItems.removeAt(position) // Xóa item khỏi danh sách giỏ hàng
-            notifyItemRemoved(position) // Cập nhật RecyclerView
-            notifyItemRangeChanged(position, cartItems.size) // Thông báo thay đổi sau khi xóa
+            cartItems.removeAt(position)
+            notifyItemRemoved(position)
+            notifyItemRangeChanged(position, cartItems.size)
             Log.d("CartAdapter", "Removed item: $removedItem")
 
-            // Xóa món ăn khỏi giỏ hàng trong SharedViewModel
             sharedViewModel.removeOrderedItem(removedItem)
         }
     }

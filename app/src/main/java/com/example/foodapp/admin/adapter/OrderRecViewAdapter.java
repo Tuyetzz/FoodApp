@@ -20,12 +20,15 @@ import com.example.foodapp.admin.model.OrderedItem;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 public class OrderRecViewAdapter extends RecyclerView.Adapter<OrderRecViewAdapter.ViewHolder> {
 
     private ArrayList<Order> orders = new ArrayList<>();
     private Context context;
+    private FirebaseFirestore db = FirebaseFirestore.getInstance(); // Khởi tạo Firestore
 
     public OrderRecViewAdapter(Context context) {
         this.context = context;
@@ -63,21 +66,42 @@ public class OrderRecViewAdapter extends RecyclerView.Adapter<OrderRecViewAdapte
 
         // Xử lý sự kiện Accept Button
         holder.acceptButton.setOnClickListener(v -> {
-            currentOrder.setOrderStatus("Accepted");
-            removeOrder(position);
+            currentOrder.setOrderStatus("Not Delivered");
+            currentOrder.setOrderDate(new Date()); // Đặt ngày hiện tại
+            updateOrderOnFirestore(currentOrder, "Not Delivered"); // Gọi hàm cập nhật
+            removeOrder(position); // Xóa order khỏi danh sách hiển thị
             Toast.makeText(context, "Order accepted for " + currentOrder.getClient().getFullName(), Toast.LENGTH_SHORT).show();
         });
 
         // Xử lý sự kiện Cancel Button
         holder.cancelButton.setOnClickListener(v -> {
             currentOrder.setOrderStatus("Cancelled");
-            removeOrder(position); // Xóa Order khỏi danh sách
+            currentOrder.setOrderDate(new Date()); // Đặt ngày hiện tại
+            updateOrderOnFirestore(currentOrder, "Cancelled"); // Gọi hàm cập nhật
+            removeOrder(position); // Xóa order khỏi danh sách hiển thị
             Toast.makeText(context, "Order cancelled for " + currentOrder.getClient().getFullName(), Toast.LENGTH_SHORT).show();
         });
     }
 
+    // Hàm cập nhật order lên Firestore
+    private void updateOrderOnFirestore(Order order, String newStatus) {
+        db.collection("orders")
+                .document(order.getId()) // Tìm tài liệu theo ID
+                .update(
+                        "orderStatus", newStatus, // Cập nhật trạng thái
+                        "orderDate", order.getOrderDate(), // Cập nhật ngày hiện tại
+                        "manager", order.getManager() // Cập nhật thông tin manager
+                )
+                .addOnSuccessListener(aVoid -> {
+                    Toast.makeText(context, "Order updated successfully", Toast.LENGTH_SHORT).show();
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(context, "Failed to update order.", Toast.LENGTH_SHORT).show();
+                    e.printStackTrace();
+                });
+    }
 
-    //xoa order khi chuyen dang
+    // Xóa order khi chuyển trạng thái
     private void removeOrder(int position) {
         if (position >= 0 && position < orders.size()) {
             orders.remove(position); // Xóa Order khỏi danh sách
@@ -85,7 +109,6 @@ public class OrderRecViewAdapter extends RecyclerView.Adapter<OrderRecViewAdapte
             notifyItemRangeChanged(position, orders.size()); // Cập nhật lại các vị trí
         }
     }
-
 
     @Override
     public int getItemCount() {
@@ -106,11 +129,10 @@ public class OrderRecViewAdapter extends RecyclerView.Adapter<OrderRecViewAdapte
             super(itemView);
             customerName = itemView.findViewById(R.id.customerName);
             orderedItems = itemView.findViewById(R.id.orderedItems);
-            textDateOrdered = itemView.findViewById(R.id.textDateOrdered); // TextView hiển thị ngày
+            textDateOrdered = itemView.findViewById(R.id.textDateOrdered);
             acceptButton = itemView.findViewById(R.id.acceptButton);
             cancelButton = itemView.findViewById(R.id.cancelButton);
-            parent = itemView.findViewById(R.id.parent); // Nếu bạn có `CardView` trong layout của bạn
+            parent = itemView.findViewById(R.id.parent);
         }
     }
-
 }

@@ -16,15 +16,14 @@ import com.example.foodapp.admin.adapter.OrderRecViewAdapter;
 import com.example.foodapp.admin.model.Order;
 import com.example.foodapp.admin.model.OrderedItem;
 import com.example.foodapp.admin.model.User;
-import com.example.foodapp.admin.model.Item;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 public class PendingOrder extends AppCompatActivity {
 
@@ -32,30 +31,30 @@ public class PendingOrder extends AppCompatActivity {
     private RecyclerView orderRecyclerView;
     private OrderRecViewAdapter adapter;
 
+    private FirebaseFirestore db;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_pending_order);
 
-        // Áp dụng insets để giao diện tương thích với thiết bị không viền
+        // Adjust layout for insets
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
 
-        // Lấy thông tin user từ intent
-        User user = (User) getIntent().getSerializableExtra("user");
+        User manager = (User) getIntent().getSerializableExtra("user");
+
+        db = FirebaseFirestore.getInstance();
 
         gobackBtn = findViewById(R.id.goback);
-        gobackBtn.setOnClickListener(view -> navigateBackToMainAdmin(user));
+        gobackBtn.setOnClickListener(view -> navigateBackToMainAdmin(manager));
 
-        // Khởi tạo RecyclerView
         setupRecyclerView();
-
-        // Thêm dữ liệu mẫu
-        loadSampleOrders(user);
+        loadOrdersFromFirestore(manager);
     }
 
     private void navigateBackToMainAdmin(User user) {
@@ -72,50 +71,59 @@ public class PendingOrder extends AppCompatActivity {
         orderRecyclerView.setAdapter(adapter);
     }
 
-    private void loadSampleOrders(User manager) {
-        ArrayList<Order> allOrders = new ArrayList<>();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+    private void loadOrdersFromFirestore(User manager) {
+        db.collection("orders")
+                .whereEqualTo("orderStatus", "Pending")
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    ArrayList<Order> orders = new ArrayList<>();
+                    for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
+                        Order order = parseOrder(document, manager);
+                        if (order != null) {
+                            orders.add(order);
+                        }
+                    }
+                    adapter.setOrders(orders);
+                })
+                .addOnFailureListener(e -> {
+                    e.printStackTrace();
+                });
+    }
 
+    private Order parseOrder(QueryDocumentSnapshot document, User manager) {
         try {
-            // Tạo các ngày cụ thể
-            Date orderDate1 = dateFormat.parse("2024-11-21");
-            Date orderDate2 = dateFormat.parse("2024-11-20");
-            Date orderDate3 = dateFormat.parse("2024-11-19");
+            // Parse client data
+            Map<String, Object> clientMap = (Map<String, Object>) document.get("client");
+            User client = clientMap != null ? new User(clientMap) : null;
 
-            // Tạo dữ liệu mẫu cho các món ăn
-            Item item1 = new Item("item1", "Burger", 5.99, "https://botocuchigiasi.vn/wp-content/uploads/2022/02/pho-bo.jpg", "Delicious beef burger", new ArrayList<>(List.of("Beef", "Bread", "Lettuce")));
-            Item item2 = new Item("item2", "Pizza", 8.99, "https://botocuchigiasi.vn/wp-content/uploads/2022/02/pho-bo.jpg", "Cheesy pizza", new ArrayList<>(List.of("Cheese", "Tomato", "Bread")));
-            Item item3 = new Item("item3", "Soda", 1.99, "https://botocuchigiasi.vn/wp-content/uploads/2022/02/pho-bo.jpg", "Refreshing soda", new ArrayList<>(List.of("Water", "Sugar", "Flavoring")));
-
-            // Tạo danh sách OrderedItem
-            List<OrderedItem> orderedItems1 = List.of(
-                    new OrderedItem("orderedItem1", item1, 2),
-                    new OrderedItem("orderedItem2", item2, 1)
-            );
-            List<OrderedItem> orderedItems2 = List.of(
-                    new OrderedItem("orderedItem3", item3, 3)
-            );
-
-            // Thêm các đơn hàng mẫu với `orderDate` cụ thể
-            allOrders.add(new Order("order1", new User("client1", "John Doe", "123 Main St", "johndoe", "123456789", "password", "client"), manager, "Pending", "Cash", orderDate1, orderedItems1));
-            allOrders.add(new Order("order2", new User("client2", "Jane Smith", "456 Elm St", "janesmith", "987654321", "password", "client"), manager, "Not delivery", "Card", orderDate2, orderedItems2));
-            allOrders.add(new Order("order3", new User("client3", "Michael Brown", "789 Oak St", "michaelbrown", "123987654", "password", "client"), manager, "Completed", "Cash", orderDate3, orderedItems1));
-
-            // Lọc các đơn hàng có trạng thái "Ready"
-            ArrayList<Order> filteredOrders = new ArrayList<>();
-            for (Order order : allOrders) {
-                if ("Pending".equalsIgnoreCase(order.getOrderStatus())) {
-                    filteredOrders.add(order);
+            // Parse ordered items
+            List<Map<String, Object>> orderedItemsList = (List<Map<String, Object>>) document.get("listOrderedItem");
+            List<OrderedItem> orderedItems = new ArrayList<>();
+            if (orderedItemsList != null) {
+                for (Map<String, Object> itemMap : orderedItemsList) {
+                    orderedItems.add(new OrderedItem(itemMap));
                 }
             }
 
-            // Cập nhật dữ liệu vào adapter
-            adapter.setOrders(filteredOrders);
+            // Check and set orderDate
+            Date orderDate = document.getDate("orderDate");
+            if (orderDate == null) {
+                orderDate = new Date();
+            }
 
-        } catch (ParseException e) {
+            return new Order(
+                    document.getId(),                 // Order ID
+                    client,                           // Client
+                    manager,                          // Manager from Intent
+                    document.getString("orderStatus"), // Order status
+                    document.getString("paymentType"), // Payment type
+                    orderDate,                         // Order date (gán ngày hôm nay nếu null)
+                    orderedItems                      // List of ordered items
+            );
+        } catch (Exception e) {
             e.printStackTrace();
+            return null;
         }
     }
-
 
 }

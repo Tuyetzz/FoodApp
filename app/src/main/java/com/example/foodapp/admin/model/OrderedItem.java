@@ -1,15 +1,33 @@
 package com.example.foodapp.admin.model;
 
-public class OrderedItem {
+import java.io.Serializable;
+import java.util.Map;
+
+public class OrderedItem implements Serializable {
     private String id;
     private Item item;
     private int quantity;
 
+    public OrderedItem() {
+
+    }
     public OrderedItem(String id, Item item, int quantity) {
         this.id = id;
         this.item = item;
         this.quantity = quantity;
     }
+
+    public OrderedItem(Map<String, Object> map) {
+        this.id = (String) map.get("id");
+        this.quantity = ((Long) map.get("quantity")).intValue();
+
+        // Convert nested map to Item
+        Map<String, Object> itemMap = (Map<String, Object>) map.get("item");
+        if (itemMap != null) {
+            this.item = new Item(itemMap);
+        }
+    }
+
 
     public String getId() {
         return id;

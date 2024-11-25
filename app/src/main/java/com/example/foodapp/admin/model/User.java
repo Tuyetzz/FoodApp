@@ -1,6 +1,7 @@
 package com.example.foodapp.admin.model;
 
 import java.io.Serializable;
+import java.util.Map;
 
 public class User implements Serializable {
     private String id;
@@ -10,6 +11,16 @@ public class User implements Serializable {
     private String phone;
     private String password;
     private String role;
+
+    public User(Map<String, Object> map) {
+        this.id = (String) map.get("id");
+        this.fullName = (String) map.get("fullName");
+        this.address = (String) map.get("address");
+        this.username = (String) map.get("username");
+        this.phone = (String) map.get("phone");
+        this.password = (String) map.get("password");
+        this.role = (String) map.get("role");
+    }
 
     // Constructor không tham số
     public User() {

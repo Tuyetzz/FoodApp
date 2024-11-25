@@ -2,6 +2,7 @@ package com.example.foodapp.admin.view;
 
 import android.content.Intent;
 import android.os.Bundle;
+
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
@@ -11,24 +12,24 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.foodapp.R;
-import com.example.foodapp.admin.model.Item;
+import com.example.foodapp.admin.adapter.CompleteOrderAdapter;
 import com.example.foodapp.admin.model.Order;
 import com.example.foodapp.admin.model.OrderedItem;
 import com.example.foodapp.admin.model.User;
-import com.example.foodapp.admin.adapter.CompleteOrderAdapter;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 public class CompleteOrder extends AppCompatActivity {
 
     private FloatingActionButton gobackBtn;
     private RecyclerView recyclerView;
     private CompleteOrderAdapter adapter;
+    private FirebaseFirestore db; // Firestore instance
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,27 +46,22 @@ public class CompleteOrder extends AppCompatActivity {
         // Retrieve the manager user from Intent
         User user = (User) getIntent().getSerializableExtra("user");
 
-        // Nạp dữ liệu mẫu
-        List<Order> sampleOrders = new ArrayList<>();
-        if (user != null) {
-            sampleOrders = loadSampleOrders(user); // Nạp dữ liệu đầy đủ
-        }
+        // Initialize Firestore
+        db = FirebaseFirestore.getInstance();
 
-        // Lọc trạng thái "Completed"
-        List<Order> completedOrders = filterOrdersByStatus(sampleOrders, "Completed");
-
-        // Khởi tạo RecyclerView và Adapter
+        // Set up RecyclerView and Adapter
         recyclerView = findViewById(R.id.completeOrderRecyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new CompleteOrderAdapter(completedOrders); // Gán danh sách đã lọc vào adapter
+        adapter = new CompleteOrderAdapter(new ArrayList<>());
         recyclerView.setAdapter(adapter);
 
+        // Set up the Go Back button
         gobackBtn = findViewById(R.id.goback);
         gobackBtn.setOnClickListener(view -> navigateBackToMainAdmin(user));
+
+        // Load completed orders from Firestore
+        loadCompletedOrdersFromFirestore(user);
     }
-
-
-
 
     private void navigateBackToMainAdmin(User user) {
         Intent intent = new Intent(getApplicationContext(), MainAdminActivity.class);
@@ -74,50 +70,52 @@ public class CompleteOrder extends AppCompatActivity {
         finish();
     }
 
-    private List<Order> filterOrdersByStatus(List<Order> orders, String status) {
-        ArrayList<Order> filteredOrders = new ArrayList<>();
-        for (Order order : orders) {
-            if (status.equalsIgnoreCase(order.getOrderStatus())) {
-                filteredOrders.add(order);
-            }
-        }
-        return filteredOrders;
+    private void loadCompletedOrdersFromFirestore(User manager) {
+        db.collection("orders")
+                .whereEqualTo("orderStatus", "Completed")
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    ArrayList<Order> completedOrders = new ArrayList<>();
+                    for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
+                        Order order = parseOrder(document, manager);
+                        if (order != null) {
+                            completedOrders.add(order);
+                        }
+                    }
+                    adapter.setOrders(completedOrders);
+                })
+                .addOnFailureListener(e -> {
+                    e.printStackTrace();
+                });
     }
 
-    private List<Order> loadSampleOrders(User manager) {
-        ArrayList<Order> allOrders = new ArrayList<>();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-
+    private Order parseOrder(QueryDocumentSnapshot document, User manager) {
         try {
-            // Create specific dates
-            Date orderDate1 = dateFormat.parse("2024-11-21");
-            Date orderDate2 = dateFormat.parse("2024-11-20");
-            Date orderDate3 = dateFormat.parse("2024-11-19");
+            // Parse client data
+            Map<String, Object> clientMap = (Map<String, Object>) document.get("client");
+            User client = clientMap != null ? new User(clientMap) : null;
 
-            // Sample items
-            Item item1 = new Item("item1", "Burger", 5.99, "https://botocuchigiasi.vn/wp-content/uploads/2022/02/pho-bo.jpg", "Delicious beef burger", new ArrayList<>(List.of("Beef", "Bread", "Lettuce")));
-            Item item2 = new Item("item2", "Pizza", 8.99, "https://botocuchigiasi.vn/wp-content/uploads/2022/02/pho-bo.jpg", "Cheesy pizza", new ArrayList<>(List.of("Cheese", "Tomato", "Bread")));
-            Item item3 = new Item("item3", "Soda", 1.99, "https://botocuchigiasi.vn/wp-content/uploads/2022/02/pho-bo.jpg", "Refreshing soda", new ArrayList<>(List.of("Water", "Sugar", "Flavoring")));
+            // Parse ordered items
+            List<Map<String, Object>> orderedItemsList = (List<Map<String, Object>>) document.get("listOrderedItem");
+            List<OrderedItem> orderedItems = new ArrayList<>();
+            if (orderedItemsList != null) {
+                for (Map<String, Object> itemMap : orderedItemsList) {
+                    orderedItems.add(new OrderedItem(itemMap));
+                }
+            }
 
-            // Ordered Items
-            List<OrderedItem> orderedItems1 = List.of(
-                    new OrderedItem("orderedItem1", item1, 2),
-                    new OrderedItem("orderedItem2", item2, 1)
+            return new Order(
+                    document.getId(),                 // Order ID
+                    client,                           // Client
+                    manager,                          // Manager from Intent
+                    document.getString("orderStatus"), // Order status
+                    document.getString("paymentType"), // Payment type
+                    document.getDate("orderDate"),     // Order date
+                    orderedItems                      // List of ordered items
             );
-            List<OrderedItem> orderedItems2 = List.of(
-                    new OrderedItem("orderedItem3", item3, 3)
-            );
-
-            // Sample orders
-            allOrders.add(new Order("order1", new User("client1", "John Doe", "123 Main St", "johndoe", "123456789", "password", "client"), manager, "Completed", "Cash", orderDate1, orderedItems1));
-            allOrders.add(new Order("order2", new User("client2", "Jane Smith", "456 Elm St", "janesmith", "987654321", "password", "client"), manager, "Completed", "Card", orderDate2, orderedItems2));
-            allOrders.add(new Order("order3", new User("client3", "Michael Brown", "789 Oak St", "michaelbrown", "123987654", "password", "client"), manager, "Ready", "Cash", orderDate3, orderedItems1));
-
-        } catch (ParseException e) {
+        } catch (Exception e) {
             e.printStackTrace();
+            return null;
         }
-
-        return allOrders;
     }
-
 }

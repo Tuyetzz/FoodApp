@@ -3,6 +3,7 @@ package com.example.foodapp.admin.model;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class Item implements Serializable {
     private String itemId;
@@ -11,6 +12,25 @@ public class Item implements Serializable {
     private String itemImage;
     private String shortDescription;
     private ArrayList<String> ingredients;
+
+    public Item(Map<String, Object> itemMap) {
+        this.itemId = (String) itemMap.get("itemId");
+        this.itemName = (String) itemMap.get("itemName");
+        this.itemPrice = itemMap.get("itemPrice") != null ? ((Number) itemMap.get("itemPrice")).doubleValue() : 0.0;
+        this.itemImage = (String) itemMap.get("itemImage");
+        this.shortDescription = (String) itemMap.get("shortDescription");
+
+        // Chuyển đổi ingredients từ List<Object> sang ArrayList<String>
+        List<Object> ingredientsRaw = (List<Object>) itemMap.get("ingredients");
+        if (ingredientsRaw != null) {
+            this.ingredients = new ArrayList<>();
+            for (Object ingredient : ingredientsRaw) {
+                this.ingredients.add(ingredient.toString());
+            }
+        } else {
+            this.ingredients = new ArrayList<>();
+        }
+    }
 
     // Constructor
     public Item(String itemId, String itemName, double itemPrice, String itemImage, String shortDescription, ArrayList<String> ingredients) {

@@ -18,16 +18,24 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.example.foodapp.Login;
 import com.example.foodapp.R;
+import com.example.foodapp.admin.model.Order;
+import com.example.foodapp.admin.model.OrderedItem;
 import com.example.foodapp.admin.model.User;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class MainAdminActivity extends AppCompatActivity {
 
     // FirebaseAuth auth;
-    TextView textView;
-    // FirebaseUser user;
+    TextView textView, numberPendingOrder, numberCompletedOrder, numberTotalMoney;
     Button logoutBtn, addMenuBtn, adminProfileBtn, viewAllMenuBtn, deliveryBtn, createAdminBtn, viewStatisticBtn, discountBtn;
     LinearLayout pendingOrder, completeOrder;
 
+    private FirebaseFirestore db;
     @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,9 +47,12 @@ public class MainAdminActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
-
+        db = FirebaseFirestore.getInstance();
 
         textView = findViewById(R.id.user_details);
+        numberPendingOrder = findViewById(R.id.numberPendingOrder);
+        numberCompletedOrder = findViewById(R.id.numberCompletedOrder);
+        numberTotalMoney = findViewById(R.id.numberTotalMoney);
 
         User user = (User) getIntent().getSerializableExtra("user");
         if (user != null) {
@@ -49,6 +60,8 @@ public class MainAdminActivity extends AppCompatActivity {
         } else {
             Toast.makeText(this, "User not found", Toast.LENGTH_SHORT).show();
         }
+
+        loadOrderStatistics();
 
 
         logoutBtn = findViewById(R.id.logout);
@@ -170,4 +183,80 @@ public class MainAdminActivity extends AppCompatActivity {
             }
         });
     }
+    private void loadOrderStatistics() {
+        db.collection("orders")
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    int pendingCount = 0;
+                    int completedCount = 0;
+                    double totalMoney = 0.0;
+
+                    for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
+                        // Parse the order
+                        Order order = parseOrder(document);
+                        if (order == null) continue;
+
+                        // Count orders based on their status
+                        if ("Pending".equalsIgnoreCase(order.getOrderStatus())) {
+                            pendingCount++;
+                        } else if ("Completed".equalsIgnoreCase(order.getOrderStatus())) {
+                            completedCount++;
+
+                            // Calculate total money only for completed orders
+                            List<Map<String, Object>> rawOrderedItems = (List<Map<String, Object>>) document.get("listOrderedItem");
+                            if (rawOrderedItems != null) {
+                                for (Map<String, Object> itemMap : rawOrderedItems) {
+                                    try {
+                                        OrderedItem orderedItem = new OrderedItem(itemMap);
+                                        totalMoney += orderedItem.getQuantity() * orderedItem.getItem().getItemPrice();
+                                    } catch (Exception e) {
+                                        e.printStackTrace(); // Log exception for debugging
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // Update UI with calculated statistics
+                    numberPendingOrder.setText(String.valueOf(pendingCount));
+                    numberCompletedOrder.setText(String.valueOf(completedCount));
+                    numberTotalMoney.setText("$" + String.format("%.2f", totalMoney));
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Failed to load order statistics", Toast.LENGTH_SHORT).show();
+                });
+    }
+
+    // Helper method to parse Firestore document into an Order object
+    private Order parseOrder(QueryDocumentSnapshot document) {
+        try {
+            // Parse client data
+            Map<String, Object> clientMap = (Map<String, Object>) document.get("client");
+            User client = clientMap != null ? new User(clientMap) : null;
+
+            // Parse ordered items
+            List<Map<String, Object>> orderedItemsList = (List<Map<String, Object>>) document.get("listOrderedItem");
+            List<OrderedItem> orderedItems = new ArrayList<>();
+            if (orderedItemsList != null) {
+                for (Map<String, Object> itemMap : orderedItemsList) {
+                    orderedItems.add(new OrderedItem(itemMap));
+                }
+            }
+
+            // Return a new Order object
+            return new Order(
+                    document.getId(),
+                    client,
+                    null, // Manager is not included in this context
+                    document.getString("orderStatus"),
+                    document.getString("paymentType"),
+                    document.getDate("orderDate"),
+                    orderedItems
+            );
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null; // Return null if parsing fails
+        }
+    }
+
 }
