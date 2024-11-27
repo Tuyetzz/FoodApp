@@ -8,7 +8,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.foodapp.databinding.CartItemBinding
 import com.example.foodapp.user.model.OrderedItem
-import com.example.foodapp.user.view.SharedViewModel
+import com.example.foodapp.user.viewmodel.SharedViewModel
 
 class CartAdapter(
     private val cartItems: MutableList<OrderedItem>,

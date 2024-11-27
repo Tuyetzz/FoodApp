@@ -12,7 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.foodapp.databinding.FragmentSearchBinding
 import com.example.foodapp.user.adapter.MenuAdapter
 import com.example.foodapp.user.model.MenuItem
-import com.example.foodapp.user.view.SharedViewModel
+import com.example.foodapp.user.viewmodel.SharedViewModel
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.toObject
 

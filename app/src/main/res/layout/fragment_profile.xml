@@ -64,7 +64,7 @@
             android:paddingEnd="16dp">
 
             <TextView
-                android:layout_width="30dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="8dp"
                 android:layout_weight="1"
@@ -83,8 +83,20 @@
                 android:ems="10"
                 android:fontFamily="@font/lato"
                 android:inputType="textMultiLine"
-                android:hint="Lorem ipsum is placeholder text commonly used in the graphic, print, and publishing industries for previewing layouts and visual " />
+                android:hint="Lorem ipsum is placeholder text commonly used in the graphic, print, and publishing industries for previewing layouts and visual" />
+
+            <!-- Button with icon and tint -->
+            <Button
+                android:id="@+id/buttonSubmit"
+                android:layout_width="51dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="8dp"
+                android:background="@drawable/ic_location"
+                android:tint="@color/endColor" />
         </LinearLayout>
+
+
+
 
         <!-- Email Field -->
         <LinearLayout

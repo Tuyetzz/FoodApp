@@ -31,10 +31,7 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="YOUR_API_KEY" />
 
-        <activity
-            android:name=".admin.view.MapsActivity"
-            android:exported="false"
-            android:label="@string/title_activity_maps" />
+
         <activity
             android:name=".admin.view.CompleteOrder"
             android:exported="false" />
@@ -78,9 +75,7 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
-
-        <!-- Activities in the user package -->
+        </activity> <!-- Activities in the user package -->
         <activity
             android:name=".user.view.PayOutActivity"
             android:exported="false" />
@@ -91,7 +86,10 @@
             android:name=".user.view.MainUserActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustPan" />
-
+        <activity
+            android:name=".user.view.MapsActivity"
+            android:exported="false"
+            android:label="@string/title_activity_maps" />
         <meta-data
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />

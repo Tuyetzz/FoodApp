@@ -11,7 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.foodapp.databinding.FragmentMenuBottomSheetBinding
 import com.example.foodapp.user.adapter.MenuAdapter
 import com.example.foodapp.user.model.MenuItem
-import com.example.foodapp.user.view.SharedViewModel
+import com.example.foodapp.user.viewmodel.SharedViewModel
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.firebase.firestore.FirebaseFirestore

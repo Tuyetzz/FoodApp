@@ -8,7 +8,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.example.foodapp.databinding.FragmentProfileBinding
-import com.example.foodapp.user.view.SharedViewModel
+import com.example.foodapp.user.viewmodel.SharedViewModel
 import com.google.firebase.firestore.FirebaseFirestore
 
 class ProfileFragment : Fragment() {

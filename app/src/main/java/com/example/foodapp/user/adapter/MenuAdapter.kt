@@ -11,7 +11,7 @@ import com.example.foodapp.databinding.MenuItemBinding
 import com.example.foodapp.user.model.MenuItem
 import com.example.foodapp.user.model.OrderedItem
 import com.example.foodapp.user.view.DetailsActivity
-import com.example.foodapp.user.view.SharedViewModel
+import com.example.foodapp.user.viewmodel.SharedViewModel
 
 class MenuAdapter(
     private val menuItems: List<MenuItem>,

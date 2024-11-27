@@ -15,6 +15,7 @@ import com.example.foodapp.admin.model.User
 import com.example.foodapp.databinding.ActivityMainUserBinding
 import com.example.foodapp.user.Fragment.Notifaction_Bottom_Fragment
 import com.example.foodapp.user.model.UserModel
+import com.example.foodapp.user.viewmodel.SharedViewModel
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
 class MainUserActivity : AppCompatActivity() {

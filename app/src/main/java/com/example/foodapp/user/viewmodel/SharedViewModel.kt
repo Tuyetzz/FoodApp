@@ -1,4 +1,4 @@
-package com.example.foodapp.user.view
+package com.example.foodapp.user.viewmodel
 
 import android.util.Log
 import androidx.lifecycle.LiveData

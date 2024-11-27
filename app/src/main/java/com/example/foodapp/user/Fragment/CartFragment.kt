@@ -14,7 +14,7 @@ import com.example.foodapp.user.adapter.CartAdapter
 import com.example.foodapp.user.model.Order
 import com.example.foodapp.user.model.OrderedItem
 import com.example.foodapp.user.view.PayOutActivity
-import com.example.foodapp.user.view.SharedViewModel
+import com.example.foodapp.user.viewmodel.SharedViewModel
 
 class CartFragment : Fragment() {
 
